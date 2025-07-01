@@ -65,6 +65,11 @@
     ul {
       padding-left: 20px;
     }
+
+    .done {
+      text-decoration: line-through;
+      color: gray;
+    }
   </style>
 </head>
 <body>
@@ -75,7 +80,7 @@
 
   <section>
     <h2>Today's Mood</h2>
-    <select id="mood">
+    <select id="mood" onchange="handleMoodChange()">
       <option value="">Choose your mood</option>
       <option value="😊 Happy">😊 Happy</option>
       <option value="😔 Sad">😔 Sad</option>
@@ -116,16 +121,35 @@
   <section class="music-box">
     <h2>🎵 Music for Your Mood</h2>
     <div id="musicPlayer">
-      <p>Select a mood to see music suggestions!</p>
+      <p>Select your mood above to hear a soft tune...</p>
     </div>
   </section>
+
+  <audio id="bgMusic" controls autoplay loop style="display: none;"></audio>
 
   <script>
     const quotes = [
       "You are enough just as you are.",
       "Soft hearts are strong hearts.",
       "You’re allowed to rest. You’re allowed to feel.",
-      "Even on quiet days, you’re still growing."
+      "Even on quiet days, you’re still growing.",
+      "You matter more than you know.",
+      "One soft step at a time.",
+      "It's okay not to be okay.",
+      "Let your soul breathe.",
+      "You’re not behind, you’re on your own path.",
+      "Kindness begins with you.",
+      "Breathe. You're doing fine.",
+      "Peace is found in the gentle moments.",
+      "The moon still shines even when it's not full.",
+      "You’re still healing, and that’s powerful.",
+      "You don’t have to carry everything alone.",
+      "You're someone's safe space.",
+      "Healing isn’t linear — but it’s happening.",
+      "Small progress is still progress.",
+      "You’re more than your hard days.",
+      "Don’t rush the blooming."
+      // Add up to 50 total if needed
     ];
 
     function newQuote() {
@@ -143,7 +167,6 @@
       localStorage.setItem("cryLogs", JSON.stringify(logs));
       document.getElementById("note").value = "";
       displayHistory();
-      displayMusic(mood);
     }
 
     function displayHistory() {
@@ -172,28 +195,48 @@
       const task = document.getElementById("todoInput").value.trim();
       if (!task) return;
       const li = document.createElement("li");
-      li.innerHTML = `<input type='checkbox'> ${task}`;
+      const checkbox = document.createElement("input");
+      checkbox.type = 'checkbox';
+      checkbox.onchange = function() {
+        if (this.checked) {
+          li.classList.add("done");
+          li.innerHTML += " ✔️ Well done!";
+        } else {
+          li.classList.remove("done");
+          li.innerHTML = '';
+          li.appendChild(checkbox);
+          li.append(" " + task);
+        }
+      };
+      li.appendChild(checkbox);
+      li.append(" " + task);
       document.getElementById("todoList").appendChild(li);
       document.getElementById("todoInput").value = "";
     }
 
-    function displayMusic(mood) {
-      const musicBox = document.getElementById("musicPlayer");
-      let musicHTML = "";
+    function handleMoodChange() {
+      const mood = document.getElementById("mood").value;
+      const music = document.getElementById("bgMusic");
+      let src = "";
       if (mood.includes("Happy")) {
-        musicHTML = '<iframe width="100%" height="100" src="https://www.youtube.com/embed/NcRtxR2yRQQ" allowfullscreen></iframe>';
+        src = "https://www.bensound.com/bensound-music/bensound-sunny.mp3";
       } else if (mood.includes("Sad")) {
-        musicHTML = '<iframe width="100%" height="100" src="https://www.youtube.com/embed/nN6VR92V70M" allowfullscreen></iframe>';
+        src = "https://www.bensound.com/bensound-music/bensound-slowmotion.mp3";
       } else if (mood.includes("Stressed")) {
-        musicHTML = '<iframe width="100%" height="100" src="https://www.youtube.com/embed/lFcSrYw-ARY" allowfullscreen></iframe>';
+        src = "https://www.bensound.com/bensound-music/bensound-relaxing.mp3";
       } else if (mood.includes("Tired")) {
-        musicHTML = '<iframe width="100%" height="100" src="https://www.youtube.com/embed/1ZYbU82GVz4" allowfullscreen></iframe>';
+        src = "https://www.bensound.com/bensound-music/bensound-tomorrow.mp3";
       } else if (mood.includes("Hopeful")) {
-        musicHTML = '<iframe width="100%" height="100" src="https://www.youtube.com/embed/58uv3F2kWto" allowfullscreen></iframe>';
-      } else {
-        musicHTML = "<p>Select a mood to get a song suggestion ✨</p>";
+        src = "https://www.bensound.com/bensound-music/bensound-goinghigher.mp3";
       }
-      musicBox.innerHTML = musicHTML;
+      if (src) {
+        music.src = src;
+        music.style.display = "block";
+        music.play();
+      } else {
+        music.pause();
+        music.style.display = "none";
+      }
     }
 
     window.onload = () => {
