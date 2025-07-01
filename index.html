@@ -5,33 +5,50 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
+    :root {
+      --bg: #fff0f5;
+      --card: #fce4ec;
+      --text: #4a148c;
+      --accent: #ba68c8;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #fff0f5;
-      color: #4a148c;
+      background-color: var(--bg);
+      color: var(--text);
       text-align: center;
-      padding: 40px;
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-size: 2.5em;
     }
 
     section {
-      background: #fce4ec;
-      padding: 20px;
+      background: var(--card);
       margin: 20px auto;
-      max-width: 500px;
+      padding: 20px;
       border-radius: 20px;
+      max-width: 500px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
-    input, select, button {
+    input, select, textarea, button {
+      width: 90%;
       padding: 10px;
-      border: none;
+      margin: 10px 0;
       border-radius: 10px;
-      margin: 10px;
+      border: none;
       font-size: 1em;
     }
 
     button {
-      background-color: #ba68c8;
+      background-color: var(--accent);
       color: white;
       cursor: pointer;
     }
@@ -40,78 +57,148 @@
       background-color: #9c27b0;
     }
 
-    .history {
+    .history, .todo-list, .hug-output, .quote-box, .music-box {
       text-align: left;
       font-size: 0.95em;
-      margin-top: 20px;
+    }
+
+    ul {
+      padding-left: 20px;
     }
   </style>
 </head>
 <body>
-
-  <h1>💖 Cry Happily</h1>
-  <p>Your soft mood diary</p>
+  <header>
+    <h1>💖 Cry Happily</h1>
+    <p>Your soft mood companion 🌸</p>
+  </header>
 
   <section>
-    <h2>How are you feeling today?</h2>
+    <h2>Today's Mood</h2>
     <select id="mood">
       <option value="">Choose your mood</option>
       <option value="😊 Happy">😊 Happy</option>
       <option value="😔 Sad">😔 Sad</option>
-      <option value="😤 Stressed">😤 Stressed</option>
+      <option value="😠 Stressed">😠 Stressed</option>
       <option value="💤 Tired">💤 Tired</option>
       <option value="🌈 Hopeful">🌈 Hopeful</option>
-    </select><br>
-
-    <input type="text" id="note" placeholder="Write your soft thought here..."><br>
-
+    </select>
+    <input type="text" id="note" placeholder="What's on your heart today?">
     <button onclick="saveMood()">Save Entry</button>
-
-    <div class="history" id="history">
-      <h3>🌸 Mood History</h3>
+    <div class="history">
+      <h3>🌰 Mood History</h3>
       <ul id="log"></ul>
     </div>
   </section>
 
+  <section class="quote-box">
+    <h2>💭 Quote of the Day</h2>
+    <p id="quote">"You are allowed to feel everything and still be loved."</p>
+    <button onclick="newQuote()">New Quote Please</button>
+  </section>
+
+  <section>
+    <h2>🤗 Send Me a Hug</h2>
+    <button onclick="sendHug()">Hug Me!</button>
+    <p id="hug-output" class="hug-output"></p>
+    <input type="text" id="selfMsg" placeholder="Send a love message to yourself">
+    <button onclick="sendMessage()">Send</button>
+    <p id="msg-output"></p>
+  </section>
+
+  <section class="todo-list">
+    <h2>📝 To-Do Reminders</h2>
+    <input type="text" id="todoInput" placeholder="Add a gentle reminder">
+    <button onclick="addReminder()">Add</button>
+    <ul id="todoList"></ul>
+  </section>
+
+  <section class="music-box">
+    <h2>🎵 Music for Your Mood</h2>
+    <div id="musicPlayer">
+      <p>Select a mood to see music suggestions!</p>
+    </div>
+  </section>
+
   <script>
+    const quotes = [
+      "You are enough just as you are.",
+      "Soft hearts are strong hearts.",
+      "You’re allowed to rest. You’re allowed to feel.",
+      "Even on quiet days, you’re still growing."
+    ];
+
+    function newQuote() {
+      const quote = quotes[Math.floor(Math.random() * quotes.length)];
+      document.getElementById("quote").innerText = '"' + quote + '"';
+    }
+
     function saveMood() {
       const mood = document.getElementById("mood").value;
       const note = document.getElementById("note").value.trim();
-      if (!mood) {
-        alert("Please select your mood 🌸");
-        return;
-      }
-
-      const entry = {
-        mood: mood,
-        note: note || "(no message)",
-        date: new Date().toLocaleString()
-      };
-
-      let logs = JSON.parse(localStorage.getItem("cryHappilyLogs")) || [];
+      if (!mood) return alert("Please select your mood");
+      const entry = { mood, note: note || "(no message)", date: new Date().toLocaleString() };
+      const logs = JSON.parse(localStorage.getItem("cryLogs")) || [];
       logs.unshift(entry);
-      localStorage.setItem("cryHappilyLogs", JSON.stringify(logs));
-
+      localStorage.setItem("cryLogs", JSON.stringify(logs));
       document.getElementById("note").value = "";
-      document.getElementById("mood").value = "";
-
       displayHistory();
+      displayMusic(mood);
     }
 
     function displayHistory() {
-      let logs = JSON.parse(localStorage.getItem("cryHappilyLogs")) || [];
+      const logs = JSON.parse(localStorage.getItem("cryLogs")) || [];
       const logList = document.getElementById("log");
       logList.innerHTML = "";
-
       logs.forEach(entry => {
         const li = document.createElement("li");
-        li.innerText = `${entry.date} — ${entry.mood} — “${entry.note}”`;
+        li.textContent = `${entry.date} — ${entry.mood} — “${entry.note}”`;
         logList.appendChild(li);
       });
     }
 
-    window.onload = displayHistory;
-  </script>
+    function sendHug() {
+      document.getElementById("hug-output").innerText = "You are hugged! You’re doing your best and I’m proud of you 💖";
+    }
 
+    function sendMessage() {
+      const msg = document.getElementById("selfMsg").value.trim();
+      if (msg === "") return alert("Type something soft ✨");
+      document.getElementById("msg-output").innerText = `You said: “${msg}”`;
+      document.getElementById("selfMsg").value = "";
+    }
+
+    function addReminder() {
+      const task = document.getElementById("todoInput").value.trim();
+      if (!task) return;
+      const li = document.createElement("li");
+      li.innerHTML = `<input type='checkbox'> ${task}`;
+      document.getElementById("todoList").appendChild(li);
+      document.getElementById("todoInput").value = "";
+    }
+
+    function displayMusic(mood) {
+      const musicBox = document.getElementById("musicPlayer");
+      let musicHTML = "";
+      if (mood.includes("Happy")) {
+        musicHTML = '<iframe width="100%" height="100" src="https://www.youtube.com/embed/NcRtxR2yRQQ" allowfullscreen></iframe>';
+      } else if (mood.includes("Sad")) {
+        musicHTML = '<iframe width="100%" height="100" src="https://www.youtube.com/embed/nN6VR92V70M" allowfullscreen></iframe>';
+      } else if (mood.includes("Stressed")) {
+        musicHTML = '<iframe width="100%" height="100" src="https://www.youtube.com/embed/lFcSrYw-ARY" allowfullscreen></iframe>';
+      } else if (mood.includes("Tired")) {
+        musicHTML = '<iframe width="100%" height="100" src="https://www.youtube.com/embed/1ZYbU82GVz4" allowfullscreen></iframe>';
+      } else if (mood.includes("Hopeful")) {
+        musicHTML = '<iframe width="100%" height="100" src="https://www.youtube.com/embed/58uv3F2kWto" allowfullscreen></iframe>';
+      } else {
+        musicHTML = "<p>Select a mood to get a song suggestion ✨</p>";
+      }
+      musicBox.innerHTML = musicHTML;
+    }
+
+    window.onload = () => {
+      displayHistory();
+    }
+  </script>
 </body>
 </html>
