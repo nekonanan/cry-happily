@@ -5,13 +5,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
+    :root {
+      --bg-light: #fff0f5;
+      --bg-dark: #1a1a2e;
+      --text-light: #4a148c;
+      --text-dark: #fce4ec;
+      --card-light: #fce4ec;
+      --card-dark: #292b4d;
+      --accent: #ba68c8;
+    }
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #fff0f5;
-      color: #4a148c;
+      background-color: var(--bg-light);
+      color: var(--text-light);
       margin: 0;
       padding: 0;
       text-align: center;
+      transition: 0.4s;
+    }
+
+    .dark-mode {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
     }
 
     header {
@@ -29,12 +45,17 @@
     }
 
     section {
-      background: #fce4ec;
+      background: var(--card-light);
       margin: 20px auto;
       padding: 30px;
-      max-width: 600px;
+      max-width: 700px;
       border-radius: 20px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: 0.3s;
+    }
+
+    .dark-mode section {
+      background: var(--card-dark);
     }
 
     img {
@@ -44,46 +65,146 @@
       margin-top: 10px;
     }
 
-    button {
-      margin-top: 20px;
+    button, input[type="text"] {
       padding: 10px 20px;
       font-size: 1em;
-      background-color: #ba68c8;
-      color: white;
       border: none;
       border-radius: 10px;
       cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+
+    button {
+      background-color: var(--accent);
+      color: white;
     }
 
     button:hover {
       background-color: #9c27b0;
     }
+
+    input[type="text"] {
+      border: 1px solid #ccc;
+      width: 80%;
+      max-width: 300px;
+    }
+
+    .toggle-btn {
+      position: fixed;
+      top: 10px;
+      right: 20px;
+      background-color: var(--accent);
+      color: white;
+    }
   </style>
 </head>
 <body>
+
+  <!-- 🌙 Dark Mode Toggle -->
+  <button class="toggle-btn" onclick="toggleDarkMode()">🌙 Toggle Mode</button>
 
   <header>
     <h1>Cry Happily</h1>
     <p class="subtitle">A website created by me nana 🤗</p>
   </header>
 
+  <!-- 💖 About Me -->
   <section>
     <h2>💖 About Me</h2>
     <p>Hi, I'm Nana. I'm the type of person who usually stays quiet in a crowd, but my mind is always full of thoughts. I find comfort in the little things — soft music, late-night talks, and peaceful moments. I don’t always say much, but that doesn’t mean I’m not feeling deeply. I just like keeping things to myself sometimes. 🤍</p>
     <img src="https://i.imgur.com/2pWZQUP.jpeg" alt="Cute aesthetic image">
   </section>
 
+  <!-- 🌦 My Mood Today (Hug Button) -->
   <section>
     <h2>🌦️ My Mood Today</h2>
     <p>Today I feel a little bit emotional but happy. It's okay to cry and still smile at the same time, right?</p>
-    <button onclick="alert('Awww… sending love & sparkles your way 💕✨')">Send me hugs</button>
+
+    <button onclick="sendHug()">Send me hugs</button>
+    <p id="hug-message" style="margin-top: 15px; font-weight: bold;"></p>
+    <p id="hug-count">Hugs received: 0</p>
+
+    <div style="margin-top: 20px;">
+      <p>💌 Send me a little love message:</p>
+      <input type="text" id="hugInput" placeholder="Type something soft...">
+      <button onclick="showMessage()">Send</button>
+      <p id="displayLove" style="margin-top: 15px; font-style: italic;"></p>
+    </div>
   </section>
 
-  <!-- Optional: Background Music -->
+  <!-- 📝 My Thoughts -->
+  <section>
+    <h2>📝 My Thoughts</h2>
+    <p>Sometimes I just want to write random things I feel. Not for likes, not for comments. Just… for me. 🌷</p>
+    <p>“There’s peace in silence, and stories in my silence.”</p>
+  </section>
+
+  <!-- 🎨 Gallery -->
+  <section>
+    <h2>🎨 Gallery</h2>
+    <p>These are a few things that make me smile:</p>
+    <img src="https://i.imgur.com/8QJZtwM.jpeg" alt="Soft picture 1">
+    <img src="https://i.imgur.com/JztdTfC.jpeg" alt="Soft picture 2">
+  </section>
+
+  <!-- 💭 Soft Quotes -->
+  <section>
+    <h2>💭 Soft Quotes</h2>
+    <p>“You’re allowed to be a work in progress and a masterpiece at the same time.”</p>
+    <p>“Your softness is not a weakness. It’s your magic.”</p>
+  </section>
+
+  <!-- 📅 Mood Tracker -->
+  <section>
+    <h2>📅 Daily Mood Tracker</h2>
+    <p>How are you feeling today?</p>
+    <select id="mood" onchange="trackMood()">
+      <option value="">Select your mood</option>
+      <option value="😊 Happy">😊 Happy</option>
+      <option value="😔 Sad">😔 Sad</option>
+      <option value="😤 Stressed">😤 Stressed</option>
+      <option value="💤 Tired">💤 Tired</option>
+      <option value="🌈 Hopeful">🌈 Hopeful</option>
+    </select>
+    <p id="moodDisplay" style="margin-top: 10px;"></p>
+  </section>
+
+  <!-- 🎵 Background Music (Optional) -->
   <audio autoplay loop>
     <source src="https://www.bensound.com/bensound-music/bensound-sunny.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
+
+  <!-- 🧠 SCRIPTS -->
+  <script>
+    let hugTotal = 0;
+
+    function sendHug() {
+      hugTotal++;
+      document.getElementById("hug-message").innerText = "Hug received! Thank you for the love 🤗💖";
+      document.getElementById("hug-count").innerText = "Hugs received: " + hugTotal;
+    }
+
+    function showMessage() {
+      const message = document.getElementById("hugInput").value;
+      if (message.trim() === "") {
+        document.getElementById("displayLove").innerText = "You forgot to write your love note 😢";
+      } else {
+        document.getElementById("displayLove").innerText = "You said: “" + message + "” 🥺💞";
+        document.getElementById("hugInput").value = "";
+      }
+    }
+
+    function trackMood() {
+      const mood = document.getElementById("mood").value;
+      document.getElementById("moodDisplay").innerText = mood ? "You chose: " + mood : "";
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+  </script>
 
 </body>
 </html>
